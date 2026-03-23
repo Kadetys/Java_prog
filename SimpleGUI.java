@@ -2,8 +2,57 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
+import java.math.RoundingMode;
+import java.text.NumberFormat;
+import java.util.Locale;
 import java.awt.*;
+
+class Set_GUI_Elements {
+    /*
+     * Расстановка элементов интерфейса
+     * на главном окне.
+     */
+    public Set_GUI_Elements(
+            JLabel label_limhigh,
+            JLabel label_limlow,
+            JLabel label_result,
+            JLabel label_step,
+            JButton button_calculate,
+            JButton button_delete,
+            JButton button_insert,
+            JTextField textbox_limhigh,
+            JTextField textbox_limlow,
+            JTextField textbox_step,
+            JTable table_result,
+            JScrollPane jp,
+            Container container) {
+        textbox_limlow.setBounds(10, 10, 200, 20);
+        textbox_limhigh.setBounds(10, 40, 200, 20);
+        textbox_step.setBounds(10, 70, 200, 20);
+        button_delete.setBounds(10, 200, 150, 50);
+        button_insert.setBounds(170, 200, 150, 50);
+        button_calculate.setBounds(330, 200, 150, 50);
+        jp.setBounds(340, 10, 320, 127);
+        table_result.setBounds(350, 30, 300, 97);
+
+        label_limlow.setBounds(220, 10, 120, 20);
+        label_limhigh.setBounds(220, 40, 120, 20);
+        label_step.setBounds(220, 70, 120, 20);
+
+        container.add(label_limlow);
+        container.add(label_limhigh);
+        container.add(label_step);
+        container.add(label_result);
+        container.add(textbox_limlow);
+        container.add(textbox_limhigh);
+        container.add(textbox_step);
+        container.add(button_delete);
+        container.add(button_insert);
+        container.add(button_calculate);
+        container.add(jp);
+        jp.setViewportView(table_result);
+    }
+}
 
 public class SimpleGUI extends JFrame {
 
@@ -12,124 +61,138 @@ public class SimpleGUI extends JFrame {
         super("Лабораторная работа №1");
         super.setBounds(0, 0, 700, 300);
         super.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
+        JScrollPane jp = new JScrollPane();
         Container container = super.getContentPane();
         container.setLayout(null);
 
-        JLabel inf1 = new JLabel("Нижняя граница");
-        JLabel inf2 = new JLabel("Верхняя граница");
-        JLabel inf3 = new JLabel("Шаг");
-        JLabel inf4 = new JLabel("Результат");
-        JTextField low = new JTextField("");
-        JTextField high = new JTextField("");
-        JTextField step = new JTextField("");
-        JScrollPane jp = new JScrollPane();
-        JTable res = new JTable(new DefaultTableModel(
+        JLabel label_limlow = new JLabel("Нижняя граница"),
+                label_limhigh = new JLabel("Верхняя граница"),
+                label_step = new JLabel("Шаг"),
+                label_result = new JLabel("Результат");
+        /*
+         * Экземпляры полей ввода для считывания нижнего,
+         * верхнего пределов и шага.
+         */
+        NumberFormat floatFormat = NumberFormat.getNumberInstance(Locale.US);
+        floatFormat.setMaximumFractionDigits(5);
+        floatFormat.setRoundingMode(RoundingMode.HALF_UP);
+        floatFormat.setGroupingUsed(false);
+        JFormattedTextField textbox_limlow = new JFormattedTextField(floatFormat),
+                textbox_limhigh = new JFormattedTextField(floatFormat),
+                textbox_step = new JFormattedTextField(floatFormat);
+        textbox_limlow.setValue(0.0);
+        textbox_limhigh.setValue(0.0);
+        textbox_step.setValue(0.0);
+
+        textbox_limhigh.setValue(0.0);
+        textbox_step.setValue(0.0);
+
+        /*
+         * Экземпляры кнопок
+         * для взаимодействия.
+         */
+        JButton button_delete = new JButton("Удалить"),
+                button_insert = new JButton("Добавить"),
+                button_calculate = new JButton("Вычислить");
+        /*
+         * Экземпляр таблицы для хранения
+         * результатов вычислений.
+         */
+        JTable table_result = new JTable((new DefaultTableModel(
+
                 new Object[][] {
 
                 },
                 new String[] {
                         "Нижний", "Верхний", "Шаг", "Результат"
-                }));
+                }) {
 
-        JButton del = new JButton("Удалить");
-        JButton add = new JButton("Добавить");
-        JButton calc = new JButton("Вычислить");
+        })) {
+            @Override
+            /*
+             * Установка последней колонки
+             * таблицы в режим "только для чтения".
+             */
+            public boolean isCellEditable(int row, int column) {
+                if (column == 3)
+                    return false;
+                return true;
+            }
+        };
+        Set_GUI_Elements setGUI = new Set_GUI_Elements(
+                label_limhigh,
+                label_limlow,
+                label_result,
+                label_step,
+                button_calculate,
+                button_delete,
+                button_insert,
+                textbox_limhigh,
+                textbox_limlow,
+                textbox_step,
+                table_result,
+                jp,
+                container);
 
-        low.setBounds(10, 10, 200, 20);
-        high.setBounds(10, 40, 200, 20);
-        step.setBounds(10, 70, 200, 20);
-        del.setBounds(10, 200, 150, 50);
-        add.setBounds(170, 200, 150, 50);
-        calc.setBounds(330, 200, 150, 50);
-        jp.setBounds(340, 10, 320, 127);
-        res.setBounds(350, 30, 300, 97);
+        IntegralActionListener Integral_al = new IntegralActionListener(table_result);
+        InsertActionListener Add_al = new InsertActionListener(
+                textbox_limlow,
+                textbox_limhigh,
+                textbox_step,
+                table_result);
+        DelActionListener Del_al = new DelActionListener(table_result);
 
-        inf1.setBounds(220, 10, 120, 20);
-        inf2.setBounds(220, 40, 120, 20);
-        inf3.setBounds(220, 70, 120, 20);
-
-        container.add(inf1);
-        container.add(inf2);
-        container.add(inf3);
-        container.add(inf4);
-        container.add(low);
-        container.add(high);
-        container.add(step);
-        container.add(del);
-        container.add(add);
-        container.add(calc);
-        container.add(jp);
-        jp.setViewportView(res);
-
-        JTextField nonEditTableField = new JTextField();
-        nonEditTableField.setEditable(false);
-        res.getColumnModel().getColumn(3).setCellEditor(
-                new DefaultCellEditor(nonEditTableField));
-        IntegralActionListener ial = new IntegralActionListener(
-                low,
-                high,
-                step,
-                res);
-        calc.addActionListener(ial);
-
-        Listener Add = new Listener(low, high, step, res);
-        add.addActionListener(Add);
-
-        DelActionListener Del = new DelActionListener(res);
-        del.addActionListener(Del);
+        button_calculate.addActionListener(Integral_al);
+        button_insert.addActionListener(Add_al);
+        button_delete.addActionListener(Del_al);
 
     }
 
     public class IntegralActionListener implements ActionListener {
-        private JTextField lowField;
-        private JTextField highField;
-        private JTextField stepField;
         private JTable table;
+        private Integral integral;
 
-        public IntegralActionListener(JTextField low, JTextField high, JTextField step, JTable table) {
-            this.lowField = low;
-            this.highField = high;
-            this.stepField = step;
+        public IntegralActionListener(JTable table) {
             this.table = table;
+            this.integral = new Integral();
 
         }
 
         public void actionPerformed(ActionEvent e) {
-            int row = table.getSelectedRow();
-            String lowText = table.getValueAt(row, 0).toString();
-            String highText = table.getValueAt(row, 1).toString();
-            String stepText = table.getValueAt(row, 2).toString();
-            double low = Double.parseDouble(lowText);
-            double high = Double.parseDouble(highText);
-            double step = Double.parseDouble(stepText);
+            int row_index = table.getSelectedRow();
+            if (row_index == -1) {
+                return;
+            }
 
-            Integral i1 = new Integral();
-            double result = i1.calculate(low, high, step);
-
-            ((DefaultTableModel) table.getModel()).setValueAt(result, row, 3);
+            double limlow = Double.parseDouble(table.getValueAt(row_index, 0).toString()),
+                    limhigh = Double.parseDouble(table.getValueAt(row_index, 1).toString()),
+                    step = Double.parseDouble(table.getValueAt(row_index, 2).toString()),
+                    result = this.integral.calculate(limlow, limhigh, step);
+            ((DefaultTableModel) table.getModel()).setValueAt(result, row_index, 3);
         }
     }
 
-    public class Listener implements ActionListener {
-        private JTextField lowField;
-        private JTextField highField;
-        private JTextField stepField;
+    public class InsertActionListener implements ActionListener {
+        private JTextField textbox_limlow;
+        private JTextField textbox_limhigh;
+        private JTextField textbox_step;
         private JTable table;
 
-        public Listener(JTextField low, JTextField high, JTextField step, JTable table) {
-            this.lowField = low;
-            this.highField = high;
-            this.stepField = step;
+        public InsertActionListener(JTextField low, JTextField high, JTextField step, JTable table) {
+
+            this.textbox_limlow = low;
+            this.textbox_limhigh = high;
+            this.textbox_step = step;
             this.table = table;
         }
 
         public void actionPerformed(ActionEvent e) {
-            String lowText = lowField.getText().trim();
-            String highText = highField.getText().trim();
-            String stepText = stepField.getText().trim();
-            DefaultTableModel tm = (DefaultTableModel) table.getModel();
-            tm.addRow(new Object[] { lowText, highText, stepText });
+            ((DefaultTableModel) table.getModel()).addRow(
+                    new Object[] {
+                            this.textbox_limlow.getText(),
+                            this.textbox_limhigh.getText(),
+                            this.textbox_step.getText() });
+
         }
 
     }
@@ -142,9 +205,11 @@ public class SimpleGUI extends JFrame {
         }
 
         public void actionPerformed(ActionEvent e) {
-            int selectedRow = table.getSelectedRow();
-            DefaultTableModel model = (DefaultTableModel) table.getModel();
-            model.removeRow(selectedRow);
+            int row_index = this.table.getSelectedRow();
+            if (row_index == -1)
+                return;
+
+            ((DefaultTableModel) this.table.getModel()).removeRow(row_index);
         }
     }
 }
