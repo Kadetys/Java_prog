@@ -20,6 +20,8 @@ class Set_GUI_Elements {
             JButton button_calculate,
             JButton button_delete,
             JButton button_insert,
+            JButton button_savetab,
+            JButton button_loadtab,
             JTextField textbox_limhigh,
             JTextField textbox_limlow,
             JTextField textbox_step,
@@ -29,9 +31,13 @@ class Set_GUI_Elements {
         textbox_limlow.setBounds(10, 10, 200, 20);
         textbox_limhigh.setBounds(10, 40, 200, 20);
         textbox_step.setBounds(10, 70, 200, 20);
-        button_delete.setBounds(10, 200, 150, 50);
-        button_insert.setBounds(170, 200, 150, 50);
-        button_calculate.setBounds(330, 200, 150, 50);
+
+        button_delete.setBounds(10, 200, 120, 50);
+        button_insert.setBounds(140, 200, 120, 50);
+        button_calculate.setBounds(270, 200, 120, 50);
+        button_savetab.setBounds(400, 200, 120, 50);
+        button_loadtab.setBounds(530, 200, 120, 50);
+
         jp.setBounds(340, 10, 320, 127);
         table_result.setBounds(350, 30, 300, 97);
 
@@ -49,6 +55,8 @@ class Set_GUI_Elements {
         container.add(button_delete);
         container.add(button_insert);
         container.add(button_calculate);
+        container.add(button_savetab);
+        container.add(button_loadtab);
         container.add(jp);
         jp.setViewportView(table_result);
     }
@@ -93,7 +101,9 @@ public class SimpleGUI extends JFrame {
          */
         JButton button_delete = new JButton("Удалить"),
                 button_insert = new JButton("Добавить"),
-                button_calculate = new JButton("Вычислить");
+                button_calculate = new JButton("Вычислить"),
+                button_savetab = new JButton("<html><center>Сохранить<br>таблицу</center></html>"),
+                button_loadtab = new JButton("<html><center>Загрузить<br>таблицу</center></html>");
         /*
          * Экземпляр таблицы для хранения
          * результатов вычислений.
@@ -108,6 +118,7 @@ public class SimpleGUI extends JFrame {
                 }) {
 
         })) {
+
             @Override
             /*
              * Установка последней колонки
@@ -119,6 +130,7 @@ public class SimpleGUI extends JFrame {
                 return true;
             }
         };
+
         Set_GUI_Elements setGUI = new Set_GUI_Elements(
                 label_limhigh,
                 label_limlow,
@@ -127,6 +139,8 @@ public class SimpleGUI extends JFrame {
                 button_calculate,
                 button_delete,
                 button_insert,
+                button_savetab,
+                button_loadtab,
                 textbox_limhigh,
                 textbox_limlow,
                 textbox_step,
@@ -169,6 +183,7 @@ public class SimpleGUI extends JFrame {
                     step = Double.parseDouble(table.getValueAt(row_index, 2).toString()),
                     result = this.integral.calculate(limlow, limhigh, step);
             ((DefaultTableModel) table.getModel()).setValueAt(result, row_index, 3);
+
         }
     }
 
@@ -210,6 +225,15 @@ public class SimpleGUI extends JFrame {
                 return;
 
             ((DefaultTableModel) this.table.getModel()).removeRow(row_index);
+        }
+    }
+
+    public class SaveActionListener implements ActionListener {
+        private RecIntegral recIntegral;
+        private JTable table;
+
+        public SaveActionListener() {
+
         }
     }
 }
