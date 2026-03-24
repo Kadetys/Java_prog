@@ -4,6 +4,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.math.RoundingMode;
 import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.Locale;
 import java.awt.*;
 
@@ -63,6 +64,7 @@ class Set_GUI_Elements {
 }
 
 public class SimpleGUI extends JFrame {
+    private ArrayList tablist;
 
     public SimpleGUI() {
 
@@ -155,10 +157,14 @@ public class SimpleGUI extends JFrame {
                 textbox_step,
                 table_result);
         DelActionListener Del_al = new DelActionListener(table_result);
+        SaveActionListener Save_al = new SaveActionListener(table_result);
+        LoadActionListener Load_al = new LoadActionListener(table_result);
 
         button_calculate.addActionListener(Integral_al);
         button_insert.addActionListener(Add_al);
         button_delete.addActionListener(Del_al);
+        button_savetab.addActionListener(Save_al);
+        button_loadtab.addActionListener(Load_al);
 
     }
 
@@ -232,8 +238,49 @@ public class SimpleGUI extends JFrame {
         private RecIntegral recIntegral;
         private JTable table;
 
-        public SaveActionListener() {
+        public SaveActionListener(JTable table) {
+            this.table = table;
+            tablist = new ArrayList<RecIntegral>();
 
+        }
+
+        public void actionPerformed(ActionEvent e) {
+
+            for (int i = 0; i < table.getRowCount(); i++) {
+                Object valObject = table.getValueAt(i, 3);
+                if (valObject == null || valObject.toString().trim().isEmpty()) {
+                    recIntegral = new RecIntegral(
+                            Double.parseDouble(table.getValueAt(i, 0).toString()),
+                            Double.parseDouble(table.getValueAt(i, 1).toString()),
+                            Double.parseDouble(table.getValueAt(i, 2).toString()));
+                } else {
+                    recIntegral = new RecIntegral(
+                            Double.parseDouble(table.getValueAt(i, 0).toString()),
+                            Double.parseDouble(table.getValueAt(i, 1).toString()),
+                            Double.parseDouble(table.getValueAt(i, 2).toString()),
+                            Double.parseDouble(table.getValueAt(i, 3).toString()));
+                }
+
+                tablist.add(recIntegral);
+            }
+        }
+    }
+
+    public class LoadActionListener implements ActionListener {
+        private JTable table;
+
+        public LoadActionListener(JTable table) {
+            this.table = table;
+        }
+
+        public void actionPerformed(ActionEvent e) {
+
+            RecIntegral recIntegral;
+            table.removeAll();
+            for (int i = 0; i < tablist.size(); i++) {
+                recIntegral = (RecIntegral) tablist.get(i);
+                ((DefaultTableModel) table.getModel()).addRow(recIntegral.getData());
+            }
         }
     }
 }
