@@ -247,19 +247,18 @@ public class SimpleGUI extends JFrame {
         public void actionPerformed(ActionEvent e) {
 
             for (int i = 0; i < table.getRowCount(); i++) {
-                Object valObject = table.getValueAt(i, 3);
-                if (valObject == null || valObject.toString().trim().isEmpty()) {
+                if (table.getValueAt(i, 3) == null ||
+                        table.getValueAt(i, 3).toString().trim().isEmpty())
                     recIntegral = new RecIntegral(
                             Double.parseDouble(table.getValueAt(i, 0).toString()),
                             Double.parseDouble(table.getValueAt(i, 1).toString()),
                             Double.parseDouble(table.getValueAt(i, 2).toString()));
-                } else {
+                else
                     recIntegral = new RecIntegral(
                             Double.parseDouble(table.getValueAt(i, 0).toString()),
                             Double.parseDouble(table.getValueAt(i, 1).toString()),
                             Double.parseDouble(table.getValueAt(i, 2).toString()),
                             Double.parseDouble(table.getValueAt(i, 3).toString()));
-                }
 
                 tablist.add(recIntegral);
             }

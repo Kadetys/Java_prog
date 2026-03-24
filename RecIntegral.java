@@ -1,14 +1,3 @@
-import java.util.ArrayList;
-import javax.swing.JTable;
-import javax.swing.table.DefaultTableModel;
-
-class RowElement {
-
-    public RowElement() {
-
-    }
-}
-
 public class RecIntegral {
 
     private double limlow, limhigh, step, result;
@@ -32,7 +21,7 @@ public class RecIntegral {
         this.result = new Integral().calculate(limlow, limhigh, step);
     }
 
-    Object[] getData() {
+    public Object[] getData() {
         Object[] dataset = { this.limlow, this.limhigh, this.step, this.result };
         return dataset;
     }
