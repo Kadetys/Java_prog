@@ -1,6 +1,26 @@
+class Integral_Exception extends Exception {
+    public Integral_Exception(String message) {
+        super(message);
+    }
+
+    public void what() {
+        System.out.print("Недопустимый диапазон введенных данных.\n\n" +
+                "Максимальное допустимое число: 999999\n" +
+                "Минимальное допустимое число: 0.000001\n");
+    }
+
+}
 
 public class Integral {
-    public double calculate(double lim_low, double lim_high, double step) {
+    public double calculate(
+            double lim_low,
+            double lim_high,
+            double step) throws Integral_Exception {
+        if ((lim_low < 0.000001 || lim_low > 1000000.0) ||
+                (lim_high < 0.000001 || lim_high > 1000000.0) ||
+                (step < 0.000001 || step > 1000000.0)) {
+            throw new Integral_Exception("Выход за диапазон допутсимых значений");
+        }
         double sum = Math.cos(lim_low);
         for (double i = lim_low + step; i < lim_high; i += step) {
             sum += Math.cos(i);

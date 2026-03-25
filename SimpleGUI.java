@@ -186,8 +186,14 @@ public class SimpleGUI extends JFrame {
 
             double limlow = Double.parseDouble(table.getValueAt(row_index, 0).toString()),
                     limhigh = Double.parseDouble(table.getValueAt(row_index, 1).toString()),
-                    step = Double.parseDouble(table.getValueAt(row_index, 2).toString()),
-                    result = this.integral.calculate(limlow, limhigh, step);
+                    step = Double.parseDouble(table.getValueAt(row_index, 2).toString());
+            double result = 0.0;
+            try {
+                result = this.integral.calculate(limlow, limhigh, step);
+            } catch (Integral_Exception ex) {
+                ex.what();
+                return;
+            }
             ((DefaultTableModel) table.getModel()).setValueAt(result, row_index, 3);
 
         }

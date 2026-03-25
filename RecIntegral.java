@@ -18,7 +18,12 @@ public class RecIntegral {
         this.limlow = limlow;
         this.limhigh = limhigh;
         this.step = step;
-        this.result = new Integral().calculate(limlow, limhigh, step);
+        try {
+            this.result = new Integral().calculate(limlow, limhigh, step);
+        } catch (Integral_Exception ex) {
+            ex.what();
+            return;
+        }
     }
 
     public Object[] getData() {
