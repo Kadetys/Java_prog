@@ -2,6 +2,10 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.math.RoundingMode;
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -33,15 +37,14 @@ class Set_GUI_Elements {
         textbox_limhigh.setBounds(10, 40, 200, 20);
         textbox_step.setBounds(10, 70, 200, 20);
 
-        button_delete.setBounds(10, 200, 120, 50);
-        button_insert.setBounds(140, 200, 120, 50);
-        button_calculate.setBounds(270, 200, 120, 50);
-        button_savetab.setBounds(400, 200, 120, 50);
-        button_loadtab.setBounds(530, 200, 120, 50);
+        button_insert.setBounds(10, 200, 120, 20);
+        button_delete.setBounds(10, 230, 120, 20);
+        button_calculate.setBounds(140, 200, 120, 50);
 
-        jp.setBounds(340, 10, 320, 127);
-        table_result.setBounds(350, 30, 300, 97);
+        button_savetab.setBounds(270, 200, 120, 50);
+        button_loadtab.setBounds(400, 200, 120, 50);
 
+        jp.setBounds(340, 10, 320, 80);
         label_limlow.setBounds(220, 10, 120, 20);
         label_limhigh.setBounds(220, 40, 120, 20);
         label_step.setBounds(220, 70, 120, 20);
@@ -101,9 +104,9 @@ public class SimpleGUI extends JFrame {
          * Экземпляры кнопок
          * для взаимодействия.
          */
-        JButton button_delete = new JButton("Удалить"),
-                button_insert = new JButton("Добавить"),
-                button_calculate = new JButton("Вычислить"),
+        JButton button_delete = new JButton("<html><center>Удалить</center></html>"),
+                button_insert = new JButton("<html><center>Добавить</center></html>"),
+                button_calculate = new JButton("<html><center>Вычислить</center></html>"),
                 button_savetab = new JButton("<html><center>Сохранить<br>таблицу</center></html>"),
                 button_loadtab = new JButton("<html><center>Загрузить<br>таблицу</center></html>");
         /*
@@ -150,16 +153,16 @@ public class SimpleGUI extends JFrame {
                 jp,
                 container);
 
-        IntegralActionListener Integral_al = new IntegralActionListener(table_result);
-        InsertActionListener Add_al = new InsertActionListener(
+        var Integral_al = new IntegralActionListener(table_result);
+        var Add_al = new InsertActionListener(
                 textbox_limlow,
                 textbox_limhigh,
                 textbox_step,
                 table_result);
-        DelActionListener Del_al = new DelActionListener(table_result);
-        SaveActionListener Save_al = new SaveActionListener(table_result);
-        LoadActionListener Load_al = new LoadActionListener(table_result);
-
+        var Del_al = new DelActionListener(table_result);
+        var Save_al = new SaveActionListener(table_result);
+        var Load_al = new LoadActionListener(
+                table_result);
         button_calculate.addActionListener(Integral_al);
         button_insert.addActionListener(Add_al);
         button_delete.addActionListener(Del_al);
@@ -244,11 +247,12 @@ public class SimpleGUI extends JFrame {
         private RecIntegral recIntegral;
         private JTable table;
         private int table_size;
+        private JFileChooser fileChooser;
 
         public SaveActionListener(JTable table) {
             this.table = table;
             tablist = new ArrayList<RecIntegral>();
-
+            fileChooser = new JFileChooser();
         }
 
         public void actionPerformed(ActionEvent e) {
@@ -271,6 +275,24 @@ public class SimpleGUI extends JFrame {
                     }
                     tablist.add(recIntegral);
                 }
+                this.fileChooser.showSaveDialog(rootPane);
+                File selectedFile = this.fileChooser.getSelectedFile();
+                FileOutputStream saved_file = null;
+                try {
+                    saved_file = new FileOutputStream(selectedFile);
+                } catch (FileNotFoundException ex) {
+                    System.out.println(ex.getMessage());
+                }
+                try {
+                    saved_file.write("\tНижний порог\t|\tВерхний порог\t|\tШаг\t|\tРезультат\t|\n".getBytes());
+                    for (var iterable_element : tablist) {
+                        saved_file.write(iterable_element.getDataStr().getBytes());
+                    }
+
+                } catch (IOException ex) {
+                    System.out.println(ex.getMessage());
+                }
+
             }
         }
     }

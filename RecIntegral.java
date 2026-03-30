@@ -1,3 +1,5 @@
+import java.io.OutputStream;
+
 public class RecIntegral {
 
     private double limlow, limhigh, step, result;
@@ -28,6 +30,12 @@ public class RecIntegral {
 
     public Object[] getData() {
         Object[] dataset = { this.limlow, this.limhigh, this.step, this.result };
+        return dataset;
+    }
+
+    public String getDataStr() {
+        String dataset = String.format("\t%f\t|\t%f\t|\t%f\t|\t%f\t|\n", this.limlow, this.limhigh, this.step,
+                this.result);
         return dataset;
     }
 
