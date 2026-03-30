@@ -3,9 +3,11 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectStreamClass;
 import java.math.RoundingMode;
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -284,7 +286,6 @@ public class SimpleGUI extends JFrame {
                     System.out.println(ex.getMessage());
                 }
                 try {
-                    saved_file.write("\tНижний порог\t|\tВерхний порог\t|\tШаг\t|\tРезультат\t|\n".getBytes());
                     for (var iterable_element : tablist) {
                         saved_file.write(iterable_element.getDataStr().getBytes());
                     }
@@ -299,17 +300,36 @@ public class SimpleGUI extends JFrame {
 
     public class LoadActionListener implements ActionListener {
         private JTable table;
+        private JFileChooser fileChooser;
 
         public LoadActionListener(JTable table) {
             this.table = table;
+            this.fileChooser = new JFileChooser();
         }
 
         public void actionPerformed(ActionEvent e) {
             for (int i = table.getRowCount() - 1; i >= 0; i--) {
                 ((DefaultTableModel) this.table.getModel()).removeRow(i);
             }
-            for (int i = 0; i < tablist.size(); i++) {
-                ((DefaultTableModel) this.table.getModel()).addRow(tablist.get(i).getData());
+            this.fileChooser.showOpenDialog(rootPane);
+            File selected_file = this.fileChooser.getSelectedFile();
+            FileInputStream loading_file = null;
+            String fileData = null;
+            try {
+                loading_file = new FileInputStream(selected_file);
+            } catch (FileNotFoundException ex) {
+                System.out.println(ex.getMessage());
+            }
+            try {
+                fileData = new String(loading_file.readAllBytes());
+                System.out.println(fileData);
+            } catch (IOException ex) {
+                System.out.println(ex.getMessage());
+            }
+            String[] rows = fileData.split("\n");
+            for (int i = 0; i < rows.length; i++) {
+                String[] cols = rows[i].split("\\d,\\d*");
+                ((DefaultTableModel) this.table.getModel()).addRow(cols);
             }
         }
     }
