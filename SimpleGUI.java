@@ -27,8 +27,9 @@ class Set_GUI_Elements {
             JButton button_calculate,
             JButton button_delete,
             JButton button_insert,
-            JButton button_savetab,
+            JButton button_cleartab,
             JButton button_loadtab,
+            JButton button_savefile,
             JTextField textbox_limhigh,
             JTextField textbox_limlow,
             JTextField textbox_step,
@@ -43,8 +44,9 @@ class Set_GUI_Elements {
         button_delete.setBounds(10, 230, 120, 20);
         button_calculate.setBounds(140, 200, 120, 50);
 
-        button_savetab.setBounds(270, 200, 120, 50);
+        button_cleartab.setBounds(270, 200, 120, 50);
         button_loadtab.setBounds(400, 200, 120, 50);
+        button_savefile.setBounds(530, 200, 120, 50);
 
         jp.setBounds(340, 10, 320, 80);
         label_limlow.setBounds(220, 10, 120, 20);
@@ -61,7 +63,8 @@ class Set_GUI_Elements {
         container.add(button_delete);
         container.add(button_insert);
         container.add(button_calculate);
-        container.add(button_savetab);
+        container.add(button_cleartab);
+        container.add(button_savefile);
         container.add(button_loadtab);
         container.add(jp);
         jp.setViewportView(table_result);
@@ -110,7 +113,8 @@ public class SimpleGUI extends JFrame {
                 button_insert = new JButton("Добавить"),
                 button_calculate = new JButton("Вычислить"),
                 button_cleartab = new JButton("<html><center>Очистить<br>таблицу</center></html>"),
-                button_loadtab = new JButton("<html><center>Загрузить<br>таблицу</center></html>");
+                button_loadtab = new JButton("<html><center>Загрузить<br>таблицу</center></html>"),
+                button_savefile = new JButton("<html><center>Сохранить<br>файл</center></html>");
         /*
          * Экземпляр таблицы для хранения
          * результатов вычислений.
@@ -148,6 +152,7 @@ public class SimpleGUI extends JFrame {
                 button_insert,
                 button_cleartab,
                 button_loadtab,
+                button_savefile,
                 textbox_limhigh,
                 textbox_limlow,
                 textbox_step,
@@ -161,15 +166,16 @@ public class SimpleGUI extends JFrame {
                 textbox_limhigh,
                 textbox_step,
                 table_result);
-        DelActionListener Del_al = new DelActionListener(table_result);
-        ClearTabActionListener ClearTab_al = new ClearTabActionListener(table_result);
-        LoadActionListener Load_al = new LoadActionListener(table_result);
-
+        var Del_al = new DelActionListener(table_result);
+        var ClearTab_al = new ClearTabActionListener(table_result);
+        var Load_al = new LoadActionListener(table_result);
+        var SaveFile_al = new SaveFileActionListener();
         button_calculate.addActionListener(Integral_al);
         button_insert.addActionListener(Add_al);
         button_delete.addActionListener(Del_al);
         button_cleartab.addActionListener(ClearTab_al);
         button_loadtab.addActionListener(Load_al);
+        button_savefile.addActionListener(SaveFile_al);
 
     }
 
@@ -189,9 +195,9 @@ public class SimpleGUI extends JFrame {
             }
             integral = tablist.get(row_index);
             try {
-                integral.setData(Double.parseDouble(table.getValueAt(row_index, 0).toString()),
-                        Double.parseDouble(table.getValueAt(row_index, 1).toString()),
-                        Double.parseDouble(table.getValueAt(row_index, 2).toString()));
+                integral.setData(Double.parseDouble(table.getValueAt(row_index, 0).toString().replace(',', '.')),
+                        Double.parseDouble(table.getValueAt(row_index, 1).toString().replace(',', '.')),
+                        Double.parseDouble(table.getValueAt(row_index, 2).toString().replace(',', '.')));
 
             } catch (Integral_Exception ex) {
                 JOptionPane.showMessageDialog(rootPane, ex.getMessage());
@@ -290,25 +296,67 @@ public class SimpleGUI extends JFrame {
                 ((DefaultTableModel) this.table.getModel()).removeRow(i);
             }
             this.fileChooser.showOpenDialog(rootPane);
-            File selected_file = this.fileChooser.getSelectedFile();
+            File selectedFile = this.fileChooser.getSelectedFile();
+            if (selectedFile == null)
+                return;
             FileInputStream loading_file = null;
             String fileData = null;
             try {
-                loading_file = new FileInputStream(selected_file);
+                loading_file = new FileInputStream(selectedFile);
             } catch (FileNotFoundException ex) {
                 System.out.println(ex.getMessage());
             }
             try {
                 fileData = new String(loading_file.readAllBytes());
-                System.out.println(fileData);
             } catch (IOException ex) {
-                System.out.println(ex.getMessage());
+                JOptionPane.showMessageDialog(rootPane,
+                        ex.getMessage());
             }
             String[] rows = fileData.split("\n");
             for (int i = 0; i < rows.length; i++) {
-                String[] cols = rows[i].split("\\d,\\d*");
-                ((DefaultTableModel) this.table.getModel()).addRow(cols);
+                String[] cols = rows[i].replaceFirst("^\\s*\\|\\s*", "").split("\\s*\\|\\s*");
+                try {
+
+                    tablist.add(new RecIntegral(
+                            Double.parseDouble(cols[0].replace(',', '.')),
+                            Double.parseDouble(cols[1].replace(',', '.')),
+                            Double.parseDouble(cols[2].replace(',', '.'))));
+                    ((DefaultTableModel) this.table.getModel()).addRow(cols);
+                } catch (Integral_Exception ex) {
+                    JOptionPane.showMessageDialog(rootPane,
+                            ex.getMessage());
+                }
+
             }
         }
     }
+
+    public class SaveFileActionListener implements ActionListener {
+
+        public void actionPerformed(ActionEvent e) {
+            JFileChooser fileChooser = new JFileChooser();
+            fileChooser.showSaveDialog(rootPane);
+            File selectedFile = fileChooser.getSelectedFile();
+            if (selectedFile == null)
+                return;
+            FileOutputStream saved_file = null;
+            try {
+                saved_file = new FileOutputStream(selectedFile);
+            } catch (FileNotFoundException ex) {
+                JOptionPane.showMessageDialog(rootPane,
+                        ex.getMessage());
+            }
+            try {
+                for (var iterable_element : tablist) {
+                    saved_file.write(iterable_element.getDataStr().getBytes());
+                }
+
+            } catch (IOException ex) {
+                JOptionPane.showMessageDialog(rootPane,
+                        ex.getMessage());
+            }
+        }
+
+    }
+
 }

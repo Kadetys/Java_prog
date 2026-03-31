@@ -24,6 +24,12 @@ public class RecIntegral {
 
     }
 
+    public String getDataStr() {
+        String dataset = String.format("|\t%f\t|\t%f\t|\t%f\t|\t%f\t|\n",
+                this.limlow, this.limhigh, this.step, this.result);
+        return dataset;
+    }
+
     public Object[] getData() {
         Object[] dataset = { this.limlow, this.limhigh, this.step, this.result };
         return dataset;
