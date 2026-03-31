@@ -7,7 +7,7 @@ public class RecIntegral {
     public RecIntegral(double limlow,
             double limhigh,
             double step,
-            double result) {
+            double result) throws Integral_Exception {
         this.limlow = limlow;
         this.limhigh = limhigh;
         this.step = step;
@@ -16,16 +16,12 @@ public class RecIntegral {
 
     public RecIntegral(double limlow,
             double limhigh,
-            double step) {
+            double step) throws Integral_Exception {
         this.limlow = limlow;
         this.limhigh = limhigh;
         this.step = step;
-        try {
-            this.result = new Integral().calculate(limlow, limhigh, step);
-        } catch (Integral_Exception ex) {
-            ex.what();
-            return;
-        }
+        this.result = new Integral().calculate(limlow, limhigh, step);
+
     }
 
     public Object[] getData() {
@@ -33,10 +29,22 @@ public class RecIntegral {
         return dataset;
     }
 
-    public String getDataStr() {
-        String dataset = String.format("|\t%f\t|\t%f\t|\t%f\t|\t%f\t|\n", this.limlow, this.limhigh, this.step,
-                this.result);
-        return dataset;
+    public void setData(double limlow,
+            double limhigh,
+            double step, double result) throws Integral_Exception {
+        this.limlow = limlow;
+        this.limhigh = limhigh;
+        this.step = step;
+        this.result = result;
+    }
+
+    public void setData(double limlow,
+            double limhigh,
+            double step) throws Integral_Exception {
+        this.limlow = limlow;
+        this.limhigh = limhigh;
+        this.step = step;
+        this.result = new Integral().calculate(limlow, limhigh, step);
     }
 
 }
