@@ -19,7 +19,13 @@ public class Integral {
         if ((lim_low < 0.000001 || lim_low > 1000000.0) ||
                 (lim_high < 0.000001 || lim_high > 1000000.0) ||
                 (step < 0.000001 || step > 1000000.0)) {
-            throw new Integral_Exception("Выход за диапазон допутсимых значений");
+            throw new Integral_Exception(
+                    "Недопустимый диапазон введенных данных.\n" +
+                            "Максимальное допустимое число: 999999\n" +
+                            "Минимальное допустимое число: 0.000001");
+        }
+        if (lim_low >= lim_high) {
+            throw new Integral_Exception("Нижний предел должен быть меньше верхнего.");
         }
         double sum = Math.cos(lim_low);
         for (double i = lim_low + step; i < lim_high; i += step) {

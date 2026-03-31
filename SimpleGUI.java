@@ -74,7 +74,7 @@ public class SimpleGUI extends JFrame {
         JScrollPane jp = new JScrollPane();
         Container container = super.getContentPane();
         container.setLayout(null);
-
+        tablist = new ArrayList<>();
         JLabel label_limlow = new JLabel("Нижняя граница"),
                 label_limhigh = new JLabel("Верхняя граница"),
                 label_step = new JLabel("Шаг"),
@@ -104,7 +104,7 @@ public class SimpleGUI extends JFrame {
         JButton button_delete = new JButton("Удалить"),
                 button_insert = new JButton("Добавить"),
                 button_calculate = new JButton("Вычислить"),
-                button_savetab = new JButton("<html><center>Сохранить<br>таблицу</center></html>"),
+                button_cleartab = new JButton("<html><center>Очистить<br>таблицу</center></html>"),
                 button_loadtab = new JButton("<html><center>Загрузить<br>таблицу</center></html>");
         /*
          * Экземпляр таблицы для хранения
@@ -141,7 +141,7 @@ public class SimpleGUI extends JFrame {
                 button_calculate,
                 button_delete,
                 button_insert,
-                button_savetab,
+                button_cleartab,
                 button_loadtab,
                 textbox_limhigh,
                 textbox_limlow,
@@ -157,24 +157,23 @@ public class SimpleGUI extends JFrame {
                 textbox_step,
                 table_result);
         DelActionListener Del_al = new DelActionListener(table_result);
-        SaveActionListener Save_al = new SaveActionListener(table_result);
+        ClearTabActionListener ClearTab_al = new ClearTabActionListener(table_result);
         LoadActionListener Load_al = new LoadActionListener(table_result);
 
         button_calculate.addActionListener(Integral_al);
         button_insert.addActionListener(Add_al);
         button_delete.addActionListener(Del_al);
-        button_savetab.addActionListener(Save_al);
+        button_cleartab.addActionListener(ClearTab_al);
         button_loadtab.addActionListener(Load_al);
 
     }
 
     public class IntegralActionListener implements ActionListener {
         private JTable table;
-        private Integral integral;
+        private RecIntegral integral;
 
         public IntegralActionListener(JTable table) {
             this.table = table;
-            this.integral = new Integral();
 
         }
 
@@ -183,18 +182,22 @@ public class SimpleGUI extends JFrame {
             if (row_index == -1) {
                 return;
             }
-
-            double limlow = Double.parseDouble(table.getValueAt(row_index, 0).toString()),
-                    limhigh = Double.parseDouble(table.getValueAt(row_index, 1).toString()),
-                    step = Double.parseDouble(table.getValueAt(row_index, 2).toString());
-            double result = 0.0;
+            integral = tablist.get(row_index);
             try {
-                result = this.integral.calculate(limlow, limhigh, step);
+                integral.setData(Double.parseDouble(table.getValueAt(row_index, 0).toString()),
+                        Double.parseDouble(table.getValueAt(row_index, 1).toString()),
+                        Double.parseDouble(table.getValueAt(row_index, 2).toString()));
+
             } catch (Integral_Exception ex) {
-                ex.what();
-                return;
+                JOptionPane.showMessageDialog(rootPane, ex.getMessage());
             }
-            ((DefaultTableModel) table.getModel()).setValueAt(result, row_index, 3);
+            tablist.set(row_index, integral);
+            for (int i = table.getRowCount() - 1; i >= 0; i--) {
+                ((DefaultTableModel) this.table.getModel()).removeRow(i);
+            }
+            for (var row : tablist) {
+                ((DefaultTableModel) this.table.getModel()).addRow(row.getData());
+            }
 
         }
     }
@@ -204,6 +207,7 @@ public class SimpleGUI extends JFrame {
         private JTextField textbox_limhigh;
         private JTextField textbox_step;
         private JTable table;
+        private RecIntegral recIntegral;
 
         public InsertActionListener(JTextField low, JTextField high, JTextField step, JTable table) {
 
@@ -214,12 +218,23 @@ public class SimpleGUI extends JFrame {
         }
 
         public void actionPerformed(ActionEvent e) {
-            ((DefaultTableModel) table.getModel()).addRow(
-                    new Object[] {
-                            this.textbox_limlow.getText(),
-                            this.textbox_limhigh.getText(),
-                            this.textbox_step.getText() });
+            try {
+                recIntegral = new RecIntegral(
+                        Double.parseDouble(textbox_limlow.getText()),
+                        Double.parseDouble(textbox_limhigh.getText()),
+                        Double.parseDouble(textbox_step.getText()));
+                tablist.add(recIntegral);
+                for (int i = table.getRowCount() - 1; i >= 0; i--) {
+                    ((DefaultTableModel) this.table.getModel()).removeRow(i);
+                }
+                for (var iterable_element : tablist) {
+                    ((DefaultTableModel) this.table.getModel()).addRow(iterable_element.getData());
+                }
 
+            } catch (Integral_Exception ex) {
+                JOptionPane.showMessageDialog(rootPane,
+                        ex.getMessage());
+            }
         }
 
     }
@@ -237,40 +252,21 @@ public class SimpleGUI extends JFrame {
                 return;
 
             ((DefaultTableModel) this.table.getModel()).removeRow(row_index);
+            tablist.remove(row_index);
         }
     }
 
-    public class SaveActionListener implements ActionListener {
-        private RecIntegral recIntegral;
+    public class ClearTabActionListener implements ActionListener {
         private JTable table;
-        private int table_size;
 
-        public SaveActionListener(JTable table) {
+        public ClearTabActionListener(JTable table) {
             this.table = table;
-            tablist = new ArrayList<RecIntegral>();
 
         }
 
         public void actionPerformed(ActionEvent e) {
-            this.table_size = table.getRowCount();
-            if (this.table_size > 30) {
-                return;
-            } else {
-                for (int i = 0; i < this.table_size; i++) {
-                    if (this.table.getValueAt(i, 3) == null) {
-                        recIntegral = new RecIntegral(
-                                Double.parseDouble(table.getValueAt(i, 0).toString()),
-                                Double.parseDouble(table.getValueAt(i, 1).toString()),
-                                Double.parseDouble(table.getValueAt(i, 2).toString()));
-                    } else {
-                        recIntegral = new RecIntegral(
-                                Double.parseDouble(table.getValueAt(i, 0).toString()),
-                                Double.parseDouble(table.getValueAt(i, 1).toString()),
-                                Double.parseDouble(table.getValueAt(i, 2).toString()),
-                                Double.parseDouble(table.getValueAt(i, 3).toString()));
-                    }
-                    tablist.add(recIntegral);
-                }
+            for (int i = table.getRowCount() - 1; i >= 0; i--) {
+                ((DefaultTableModel) this.table.getModel()).removeRow(i);
             }
         }
     }
