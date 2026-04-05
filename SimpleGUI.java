@@ -7,6 +7,9 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutput;
+import java.io.ObjectOutputStream;
 import java.io.ObjectStreamClass;
 import java.math.RoundingMode;
 import java.text.NumberFormat;
@@ -292,6 +295,7 @@ public class SimpleGUI extends JFrame {
         }
 
         public void actionPerformed(ActionEvent e) {
+            tablist.removeAll(tablist);
             for (int i = table.getRowCount() - 1; i >= 0; i--) {
                 ((DefaultTableModel) this.table.getModel()).removeRow(i);
             }
@@ -301,17 +305,41 @@ public class SimpleGUI extends JFrame {
                 return;
             FileInputStream loading_file = null;
             String fileData = null;
+
             try {
                 loading_file = new FileInputStream(selectedFile);
             } catch (FileNotFoundException ex) {
                 System.out.println(ex.getMessage());
             }
+
+            if (selectedFile.getName().contains(".bin")) {
+                try {
+                    ObjectInputStream ois = new ObjectInputStream(loading_file);
+                    tablist = (ArrayList<RecIntegral>) ois.readObject();
+                    if (this.table.getRowCount() > 0)
+                        for (int i = this.table.getRowCount() - 1; i > 0; i--)
+                            ((DefaultTableModel) this.table.getModel()).removeRow(i);
+                    for (var i : tablist)
+                        ((DefaultTableModel) this.table.getModel()).addRow(i.getData());
+
+                    return;
+                } catch (IOException ex) {
+                    JOptionPane.showMessageDialog(rootPane, ex.getMessage());
+                    System.out.print(ex.getMessage());
+                } catch (ClassNotFoundException ex) {
+                    JOptionPane.showMessageDialog(rootPane, ex.getMessage());
+                    System.out.print(ex.getMessage());
+                }
+
+            }
+
             try {
                 fileData = new String(loading_file.readAllBytes());
             } catch (IOException ex) {
                 JOptionPane.showMessageDialog(rootPane,
                         ex.getMessage());
             }
+
             String[] rows = fileData.split("\n");
             for (int i = 0; i < rows.length; i++) {
                 String[] cols = rows[i].replaceFirst("^\\s*\\|\\s*", "").split("\\s*\\|\\s*");
@@ -321,7 +349,7 @@ public class SimpleGUI extends JFrame {
                             Double.parseDouble(cols[0].replace(',', '.')),
                             Double.parseDouble(cols[1].replace(',', '.')),
                             Double.parseDouble(cols[2].replace(',', '.'))));
-                    ((DefaultTableModel) this.table.getModel()).addRow(cols);
+                    ((DefaultTableModel) this.table.getModel()).addRow(tablist.getLast().getData());
                 } catch (Integral_Exception ex) {
                     JOptionPane.showMessageDialog(rootPane,
                             ex.getMessage());
@@ -334,21 +362,27 @@ public class SimpleGUI extends JFrame {
     public class SaveFileActionListener implements ActionListener {
 
         public void actionPerformed(ActionEvent e) {
-            JFileChooser fileChooser = new JFileChooser();
-            fileChooser.showSaveDialog(rootPane);
-            File selectedFile = fileChooser.getSelectedFile();
-            if (selectedFile == null)
+            JFileChooser fileChooser_text = new JFileChooser(),
+                    fileChooser_bin = new JFileChooser();
+            fileChooser_text.showSaveDialog(rootPane);
+            fileChooser_bin.showSaveDialog(rootPane);
+            File selectedFile_text = fileChooser_text.getSelectedFile(),
+                    selectedFile_bin = fileChooser_bin.getSelectedFile();
+            if (selectedFile_text == null || selectedFile_bin == null)
                 return;
-            FileOutputStream saved_file = null;
+            FileOutputStream saved_file_text = null, saved_file_bin = null;
             try {
-                saved_file = new FileOutputStream(selectedFile);
+                saved_file_text = new FileOutputStream(selectedFile_text);
+                saved_file_bin = new FileOutputStream(selectedFile_bin);
             } catch (FileNotFoundException ex) {
                 JOptionPane.showMessageDialog(rootPane,
                         ex.getMessage());
             }
             try {
+                ObjectOutputStream oos = new ObjectOutputStream(saved_file_bin);
+                oos.writeObject(tablist);
                 for (var iterable_element : tablist) {
-                    saved_file.write(iterable_element.getDataStr().getBytes());
+                    saved_file_text.write(iterable_element.getDataStr().getBytes());
                 }
 
             } catch (IOException ex) {

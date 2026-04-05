@@ -1,6 +1,7 @@
 import java.io.OutputStream;
+import java.io.Serializable;
 
-public class RecIntegral {
+public class RecIntegral implements Serializable {
 
     private double limlow, limhigh, step, result;
 
