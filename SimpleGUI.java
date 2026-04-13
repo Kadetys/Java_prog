@@ -117,7 +117,8 @@ public class SimpleGUI extends JFrame {
                 button_calculate = new JButton("Вычислить"),
                 button_cleartab = new JButton("<html><center>Очистить<br>таблицу</center></html>"),
                 button_loadtab = new JButton("<html><center>Загрузить<br>таблицу</center></html>"),
-                button_savefile = new JButton("<html><center>Сохранить<br>файл</center></html>");
+                button_save_textfile = new JButton("<html><center>Сохранить<br>текстовый файл</center></html>"),
+                button_save_binfile = new JButton("<html><center>Сохранить<br>двоичный файл</center></html>");
         /*
          * Экземпляр таблицы для хранения
          * результатов вычислений.
@@ -155,7 +156,7 @@ public class SimpleGUI extends JFrame {
                 button_insert,
                 button_cleartab,
                 button_loadtab,
-                button_savefile,
+                button_save_textfile,
                 textbox_limhigh,
                 textbox_limlow,
                 textbox_step,
@@ -178,7 +179,7 @@ public class SimpleGUI extends JFrame {
         button_delete.addActionListener(Del_al);
         button_cleartab.addActionListener(ClearTab_al);
         button_loadtab.addActionListener(Load_al);
-        button_savefile.addActionListener(SaveFile_al);
+        button_save_textfile.addActionListener(SaveFile_al);
 
     }
 
