@@ -1,4 +1,6 @@
 import javax.swing.*;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -32,7 +34,8 @@ class Set_GUI_Elements {
             JButton button_insert,
             JButton button_cleartab,
             JButton button_loadtab,
-            JButton button_savefile,
+            JButton button_save_textfile,
+            JButton button_save_binfile,
             JTextField textbox_limhigh,
             JTextField textbox_limlow,
             JTextField textbox_step,
@@ -49,9 +52,10 @@ class Set_GUI_Elements {
 
         button_cleartab.setBounds(270, 200, 120, 50);
         button_loadtab.setBounds(400, 200, 120, 50);
-        button_savefile.setBounds(530, 200, 120, 50);
+        button_save_textfile.setBounds(530, 200, 120, 50);
+        button_save_binfile.setBounds(660, 200, 120, 50);
 
-        jp.setBounds(340, 10, 320, 80);
+        jp.setBounds(400, 10, 360, 80);
         label_limlow.setBounds(220, 10, 120, 20);
         label_limhigh.setBounds(220, 40, 120, 20);
         label_step.setBounds(220, 70, 120, 20);
@@ -67,7 +71,8 @@ class Set_GUI_Elements {
         container.add(button_insert);
         container.add(button_calculate);
         container.add(button_cleartab);
-        container.add(button_savefile);
+        container.add(button_save_textfile);
+        container.add(button_save_binfile);
         container.add(button_loadtab);
         container.add(jp);
         jp.setViewportView(table_result);
@@ -80,7 +85,7 @@ public class SimpleGUI extends JFrame {
     public SimpleGUI() {
 
         super("Лабораторная работа №1");
-        super.setBounds(0, 0, 700, 300);
+        super.setBounds(0, 0, 800, 300);
         super.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         JScrollPane jp = new JScrollPane();
         Container container = super.getContentPane();
@@ -157,6 +162,7 @@ public class SimpleGUI extends JFrame {
                 button_cleartab,
                 button_loadtab,
                 button_save_textfile,
+                button_save_binfile,
                 textbox_limhigh,
                 textbox_limlow,
                 textbox_step,
@@ -173,13 +179,16 @@ public class SimpleGUI extends JFrame {
         var Del_al = new DelActionListener(table_result);
         var ClearTab_al = new ClearTabActionListener(table_result);
         var Load_al = new LoadActionListener(table_result);
-        var SaveFile_al = new SaveFileActionListener();
-        button_calculate.addActionListener(Integral_al);
+        var SaveTextFile_al = new SaveTextActionListener();
+        var SaveBinFile_al = new SaveBinActionListener();
+        button_calculate.addActionListener(
+                Integral_al);
         button_insert.addActionListener(Add_al);
         button_delete.addActionListener(Del_al);
         button_cleartab.addActionListener(ClearTab_al);
         button_loadtab.addActionListener(Load_al);
-        button_save_textfile.addActionListener(SaveFile_al);
+        button_save_textfile.addActionListener(SaveTextFile_al);
+        button_save_binfile.addActionListener(SaveBinFile_al);
 
     }
 
@@ -300,7 +309,13 @@ public class SimpleGUI extends JFrame {
             for (int i = table.getRowCount() - 1; i >= 0; i--) {
                 ((DefaultTableModel) this.table.getModel()).removeRow(i);
             }
+            var filter = new FileNameExtensionFilter("Допустимые файлы: *.txt, *.object, *.bin",
+                    "txt",
+                    "object",
+                    "bin");
+            this.fileChooser.setFileFilter(filter);
             this.fileChooser.showOpenDialog(rootPane);
+
             File selectedFile = this.fileChooser.getSelectedFile();
             if (selectedFile == null)
                 return;
@@ -313,7 +328,7 @@ public class SimpleGUI extends JFrame {
                 System.out.println(ex.getMessage());
             }
 
-            if (selectedFile.getName().contains(".bin")) {
+            if (selectedFile.getName().contains(".bin") || selectedFile.getName().contains(".object")) {
                 try {
                     ObjectInputStream ois = new ObjectInputStream(loading_file);
                     tablist = (ArrayList<RecIntegral>) ois.readObject();
@@ -360,28 +375,25 @@ public class SimpleGUI extends JFrame {
         }
     }
 
-    public class SaveFileActionListener implements ActionListener {
+    public class SaveTextActionListener implements ActionListener {
 
         public void actionPerformed(ActionEvent e) {
-            JFileChooser fileChooser_text = new JFileChooser(),
-                    fileChooser_bin = new JFileChooser();
+            JFileChooser fileChooser_text = new JFileChooser();
+            var filter = new FileNameExtensionFilter("Текстовый файл (*.txt)", "txt");
+            fileChooser_text.setFileFilter(filter);
             fileChooser_text.showSaveDialog(rootPane);
-            fileChooser_bin.showSaveDialog(rootPane);
-            File selectedFile_text = fileChooser_text.getSelectedFile(),
-                    selectedFile_bin = fileChooser_bin.getSelectedFile();
-            if (selectedFile_text == null || selectedFile_bin == null)
+
+            File selectedFile_text = fileChooser_text.getSelectedFile();
+            if (selectedFile_text == null)
                 return;
-            FileOutputStream saved_file_text = null, saved_file_bin = null;
+            FileOutputStream saved_file_text = null;
             try {
                 saved_file_text = new FileOutputStream(selectedFile_text);
-                saved_file_bin = new FileOutputStream(selectedFile_bin);
             } catch (FileNotFoundException ex) {
                 JOptionPane.showMessageDialog(rootPane,
                         ex.getMessage());
             }
             try {
-                ObjectOutputStream oos = new ObjectOutputStream(saved_file_bin);
-                oos.writeObject(tablist);
                 for (var iterable_element : tablist) {
                     saved_file_text.write(iterable_element.getDataStr().getBytes());
                 }
@@ -394,4 +406,31 @@ public class SimpleGUI extends JFrame {
 
     }
 
+    public class SaveBinActionListener implements ActionListener {
+
+        public void actionPerformed(ActionEvent e) {
+            JFileChooser fileChooser_bin = new JFileChooser();
+            fileChooser_bin
+                    .setFileFilter(new FileNameExtensionFilter("Двоичный файл (*.bin, *.object)", "bin", "object"));
+            fileChooser_bin.showSaveDialog(rootPane);
+
+            File selectedFile_bin = fileChooser_bin.getSelectedFile();
+            if (selectedFile_bin == null)
+                return;
+            FileOutputStream saved_file_bin = null;
+            try {
+                saved_file_bin = new FileOutputStream(selectedFile_bin);
+            } catch (FileNotFoundException ex) {
+                JOptionPane.showMessageDialog(rootPane,
+                        ex.getMessage());
+            }
+            try {
+                ObjectOutputStream oos = new ObjectOutputStream(saved_file_bin);
+                oos.writeObject(tablist);
+            } catch (IOException ex) {
+                JOptionPane.showMessageDialog(rootPane,
+                        ex.getMessage());
+            }
+        }
+    }
 }
