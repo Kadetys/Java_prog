@@ -21,7 +21,7 @@ public class RecIntegral implements Serializable {
         this.limlow = limlow;
         this.limhigh = limhigh;
         this.step = step;
-        this.result = new Integral().calculate(limlow, limhigh, step);
+        this.result = 0;
 
     }
 
@@ -51,7 +51,12 @@ public class RecIntegral implements Serializable {
         this.limlow = limlow;
         this.limhigh = limhigh;
         this.step = step;
-        this.result = new Integral().calculate(limlow, limhigh, step);
+
+        try {
+            this.result = new Integral().calculate(limlow, limhigh, step);
+        } catch (Integral_Exception | InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
 }
