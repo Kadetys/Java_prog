@@ -1,3 +1,7 @@
+import java.time.*;
+
+import javax.swing.JOptionPane;
+
 class Integral_Exception extends Exception {
     public Integral_Exception(String message) {
         super(message);
@@ -76,6 +80,7 @@ public class Integral {
                 step,
                 this,
                 "th3");
+        long start = System.nanoTime();
         th1.start();
         th2.start();
         th3.start();
@@ -87,7 +92,8 @@ public class Integral {
         } catch (InterruptedException ex) {
             System.out.println(ex.getMessage());
         }
-
+        long stop = System.nanoTime();
+        System.out.printf("Время вычисления: %d мс.\n", (stop - start) / 1000_000);
         return result;
     }
 
