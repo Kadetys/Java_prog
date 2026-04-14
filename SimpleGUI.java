@@ -2,18 +2,8 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutput;
-import java.io.ObjectOutputStream;
-import java.io.ObjectStreamClass;
 import java.math.RoundingMode;
 import java.text.NumberFormat;
-import java.util.ArrayList;
 import java.util.Locale;
 import java.awt.*;
 
@@ -30,9 +20,6 @@ class Set_GUI_Elements {
             JButton button_calculate,
             JButton button_delete,
             JButton button_insert,
-            JButton button_cleartab,
-            JButton button_loadtab,
-            JButton button_savefile,
             JTextField textbox_limhigh,
             JTextField textbox_limlow,
             JTextField textbox_step,
@@ -42,16 +29,12 @@ class Set_GUI_Elements {
         textbox_limlow.setBounds(10, 10, 200, 20);
         textbox_limhigh.setBounds(10, 40, 200, 20);
         textbox_step.setBounds(10, 70, 200, 20);
+        button_delete.setBounds(10, 200, 150, 50);
+        button_insert.setBounds(170, 200, 150, 50);
+        button_calculate.setBounds(330, 200, 150, 50);
+        jp.setBounds(340, 10, 320, 127);
+        table_result.setBounds(350, 30, 300, 97);
 
-        button_insert.setBounds(10, 200, 120, 20);
-        button_delete.setBounds(10, 230, 120, 20);
-        button_calculate.setBounds(140, 200, 120, 50);
-
-        button_cleartab.setBounds(270, 200, 120, 50);
-        button_loadtab.setBounds(400, 200, 120, 50);
-        button_savefile.setBounds(530, 200, 120, 50);
-
-        jp.setBounds(340, 10, 320, 80);
         label_limlow.setBounds(220, 10, 120, 20);
         label_limhigh.setBounds(220, 40, 120, 20);
         label_step.setBounds(220, 70, 120, 20);
@@ -66,16 +49,12 @@ class Set_GUI_Elements {
         container.add(button_delete);
         container.add(button_insert);
         container.add(button_calculate);
-        container.add(button_cleartab);
-        container.add(button_savefile);
-        container.add(button_loadtab);
         container.add(jp);
         jp.setViewportView(table_result);
     }
 }
 
 public class SimpleGUI extends JFrame {
-    private ArrayList<RecIntegral> tablist;
 
     public SimpleGUI() {
 
@@ -85,7 +64,7 @@ public class SimpleGUI extends JFrame {
         JScrollPane jp = new JScrollPane();
         Container container = super.getContentPane();
         container.setLayout(null);
-        tablist = new ArrayList<>();
+
         JLabel label_limlow = new JLabel("Нижняя граница"),
                 label_limhigh = new JLabel("Верхняя граница"),
                 label_step = new JLabel("Шаг"),
@@ -114,10 +93,7 @@ public class SimpleGUI extends JFrame {
          */
         JButton button_delete = new JButton("Удалить"),
                 button_insert = new JButton("Добавить"),
-                button_calculate = new JButton("Вычислить"),
-                button_cleartab = new JButton("<html><center>Очистить<br>таблицу</center></html>"),
-                button_loadtab = new JButton("<html><center>Загрузить<br>таблицу</center></html>"),
-                button_savefile = new JButton("<html><center>Сохранить<br>файл</center></html>");
+                button_calculate = new JButton("Вычислить");
         /*
          * Экземпляр таблицы для хранения
          * результатов вычислений.
@@ -132,7 +108,6 @@ public class SimpleGUI extends JFrame {
                 }) {
 
         })) {
-
             @Override
             /*
              * Установка последней колонки
@@ -144,7 +119,6 @@ public class SimpleGUI extends JFrame {
                 return true;
             }
         };
-
         Set_GUI_Elements setGUI = new Set_GUI_Elements(
                 label_limhigh,
                 label_limlow,
@@ -153,9 +127,6 @@ public class SimpleGUI extends JFrame {
                 button_calculate,
                 button_delete,
                 button_insert,
-                button_cleartab,
-                button_loadtab,
-                button_savefile,
                 textbox_limhigh,
                 textbox_limlow,
                 textbox_step,
@@ -163,31 +134,27 @@ public class SimpleGUI extends JFrame {
                 jp,
                 container);
 
-        var Integral_al = new IntegralActionListener(table_result);
-        var Add_al = new InsertActionListener(
+        IntegralActionListener Integral_al = new IntegralActionListener(table_result);
+        InsertActionListener Add_al = new InsertActionListener(
                 textbox_limlow,
                 textbox_limhigh,
                 textbox_step,
                 table_result);
-        var Del_al = new DelActionListener(table_result);
-        var ClearTab_al = new ClearTabActionListener(table_result);
-        var Load_al = new LoadActionListener(table_result);
-        var SaveFile_al = new SaveFileActionListener();
+        DelActionListener Del_al = new DelActionListener(table_result);
+
         button_calculate.addActionListener(Integral_al);
         button_insert.addActionListener(Add_al);
         button_delete.addActionListener(Del_al);
-        button_cleartab.addActionListener(ClearTab_al);
-        button_loadtab.addActionListener(Load_al);
-        button_savefile.addActionListener(SaveFile_al);
 
     }
 
     public class IntegralActionListener implements ActionListener {
         private JTable table;
-        private RecIntegral integral;
+        private Integral integral;
 
         public IntegralActionListener(JTable table) {
             this.table = table;
+            this.integral = new Integral();
 
         }
 
@@ -196,23 +163,12 @@ public class SimpleGUI extends JFrame {
             if (row_index == -1) {
                 return;
             }
-            integral = tablist.get(row_index);
-            try {
-                integral.setData(Double.parseDouble(table.getValueAt(row_index, 0).toString().replace(',', '.')),
-                        Double.parseDouble(table.getValueAt(row_index, 1).toString().replace(',', '.')),
-                        Double.parseDouble(table.getValueAt(row_index, 2).toString().replace(',', '.')));
 
-            } catch (Integral_Exception ex) {
-                JOptionPane.showMessageDialog(rootPane, ex.getMessage());
-            }
-            tablist.set(row_index, integral);
-            for (int i = table.getRowCount() - 1; i >= 0; i--) {
-                ((DefaultTableModel) this.table.getModel()).removeRow(i);
-            }
-            for (var row : tablist) {
-                ((DefaultTableModel) this.table.getModel()).addRow(row.getData());
-            }
-
+            double limlow = Double.parseDouble(table.getValueAt(row_index, 0).toString()),
+                    limhigh = Double.parseDouble(table.getValueAt(row_index, 1).toString()),
+                    step = Double.parseDouble(table.getValueAt(row_index, 2).toString()),
+                    result = this.integral.calculate(limlow, limhigh, step);
+            ((DefaultTableModel) table.getModel()).setValueAt(result, row_index, 3);
         }
     }
 
@@ -221,7 +177,6 @@ public class SimpleGUI extends JFrame {
         private JTextField textbox_limhigh;
         private JTextField textbox_step;
         private JTable table;
-        private RecIntegral recIntegral;
 
         public InsertActionListener(JTextField low, JTextField high, JTextField step, JTable table) {
 
@@ -232,23 +187,12 @@ public class SimpleGUI extends JFrame {
         }
 
         public void actionPerformed(ActionEvent e) {
-            try {
-                recIntegral = new RecIntegral(
-                        Double.parseDouble(textbox_limlow.getText()),
-                        Double.parseDouble(textbox_limhigh.getText()),
-                        Double.parseDouble(textbox_step.getText()));
-                tablist.add(recIntegral);
-                for (int i = table.getRowCount() - 1; i >= 0; i--) {
-                    ((DefaultTableModel) this.table.getModel()).removeRow(i);
-                }
-                for (var iterable_element : tablist) {
-                    ((DefaultTableModel) this.table.getModel()).addRow(iterable_element.getData());
-                }
+            ((DefaultTableModel) table.getModel()).addRow(
+                    new Object[] {
+                            this.textbox_limlow.getText(),
+                            this.textbox_limhigh.getText(),
+                            this.textbox_step.getText() });
 
-            } catch (Integral_Exception ex) {
-                JOptionPane.showMessageDialog(rootPane,
-                        ex.getMessage());
-            }
         }
 
     }
@@ -266,131 +210,6 @@ public class SimpleGUI extends JFrame {
                 return;
 
             ((DefaultTableModel) this.table.getModel()).removeRow(row_index);
-            tablist.remove(row_index);
         }
     }
-
-    public class ClearTabActionListener implements ActionListener {
-        private JTable table;
-
-        public ClearTabActionListener(JTable table) {
-            this.table = table;
-
-        }
-
-        public void actionPerformed(ActionEvent e) {
-            for (int i = table.getRowCount() - 1; i >= 0; i--) {
-                ((DefaultTableModel) this.table.getModel()).removeRow(i);
-            }
-        }
-    }
-
-    public class LoadActionListener implements ActionListener {
-        private JTable table;
-        private JFileChooser fileChooser;
-
-        public LoadActionListener(JTable table) {
-            this.table = table;
-            this.fileChooser = new JFileChooser();
-        }
-
-        public void actionPerformed(ActionEvent e) {
-            tablist.removeAll(tablist);
-            for (int i = table.getRowCount() - 1; i >= 0; i--) {
-                ((DefaultTableModel) this.table.getModel()).removeRow(i);
-            }
-            this.fileChooser.showOpenDialog(rootPane);
-            File selectedFile = this.fileChooser.getSelectedFile();
-            if (selectedFile == null)
-                return;
-            FileInputStream loading_file = null;
-            String fileData = null;
-
-            try {
-                loading_file = new FileInputStream(selectedFile);
-            } catch (FileNotFoundException ex) {
-                System.out.println(ex.getMessage());
-            }
-
-            if (selectedFile.getName().contains(".bin")) {
-                try {
-                    ObjectInputStream ois = new ObjectInputStream(loading_file);
-                    tablist = (ArrayList<RecIntegral>) ois.readObject();
-                    if (this.table.getRowCount() > 0)
-                        for (int i = this.table.getRowCount() - 1; i > 0; i--)
-                            ((DefaultTableModel) this.table.getModel()).removeRow(i);
-                    for (var i : tablist)
-                        ((DefaultTableModel) this.table.getModel()).addRow(i.getData());
-
-                    return;
-                } catch (IOException ex) {
-                    JOptionPane.showMessageDialog(rootPane, ex.getMessage());
-                    System.out.print(ex.getMessage());
-                } catch (ClassNotFoundException ex) {
-                    JOptionPane.showMessageDialog(rootPane, ex.getMessage());
-                    System.out.print(ex.getMessage());
-                }
-
-            }
-
-            try {
-                fileData = new String(loading_file.readAllBytes());
-            } catch (IOException ex) {
-                JOptionPane.showMessageDialog(rootPane,
-                        ex.getMessage());
-            }
-
-            String[] rows = fileData.split("\n");
-            for (int i = 0; i < rows.length; i++) {
-                String[] cols = rows[i].replaceFirst("^\\s*\\|\\s*", "").split("\\s*\\|\\s*");
-                try {
-
-                    tablist.add(new RecIntegral(
-                            Double.parseDouble(cols[0].replace(',', '.')),
-                            Double.parseDouble(cols[1].replace(',', '.')),
-                            Double.parseDouble(cols[2].replace(',', '.'))));
-                    ((DefaultTableModel) this.table.getModel()).addRow(tablist.getLast().getData());
-                } catch (Integral_Exception ex) {
-                    JOptionPane.showMessageDialog(rootPane,
-                            ex.getMessage());
-                }
-
-            }
-        }
-    }
-
-    public class SaveFileActionListener implements ActionListener {
-
-        public void actionPerformed(ActionEvent e) {
-            JFileChooser fileChooser_text = new JFileChooser(),
-                    fileChooser_bin = new JFileChooser();
-            fileChooser_text.showSaveDialog(rootPane);
-            fileChooser_bin.showSaveDialog(rootPane);
-            File selectedFile_text = fileChooser_text.getSelectedFile(),
-                    selectedFile_bin = fileChooser_bin.getSelectedFile();
-            if (selectedFile_text == null || selectedFile_bin == null)
-                return;
-            FileOutputStream saved_file_text = null, saved_file_bin = null;
-            try {
-                saved_file_text = new FileOutputStream(selectedFile_text);
-                saved_file_bin = new FileOutputStream(selectedFile_bin);
-            } catch (FileNotFoundException ex) {
-                JOptionPane.showMessageDialog(rootPane,
-                        ex.getMessage());
-            }
-            try {
-                ObjectOutputStream oos = new ObjectOutputStream(saved_file_bin);
-                oos.writeObject(tablist);
-                for (var iterable_element : tablist) {
-                    saved_file_text.write(iterable_element.getDataStr().getBytes());
-                }
-
-            } catch (IOException ex) {
-                JOptionPane.showMessageDialog(rootPane,
-                        ex.getMessage());
-            }
-        }
-
-    }
-
 }
