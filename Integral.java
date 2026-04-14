@@ -27,6 +27,7 @@ public class Integral {
         if (lim_low >= lim_high) {
             throw new Integral_Exception("Нижний предел должен быть меньше верхнего.");
         }
+        long start = System.nanoTime();
         double sum = Math.cos(lim_low);
         for (double i = lim_low + step; i < lim_high; i += step) {
             sum += Math.cos(i);
@@ -37,6 +38,8 @@ public class Integral {
 
             }
         }
+        long stop = System.nanoTime();
+        System.out.printf("Время вычисления: %d мс \n", (stop - start) / 1_000_000);
         return sum;
     }
 }
