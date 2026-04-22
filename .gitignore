@@ -1,0 +1,3 @@
+Server/build/*
+Server/*.sh
+Server/*.jar

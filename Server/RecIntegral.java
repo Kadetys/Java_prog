@@ -1,6 +1,5 @@
 package Server;
 
-import java.io.OutputStream;
 import java.io.Serializable;
 
 public class RecIntegral implements Serializable {
