@@ -1,3 +1,7 @@
 Server/build/*
 Server/*.sh
 Server/*.jar
+
+Client/build/*
+Client/*.sh
+Client/*.jar

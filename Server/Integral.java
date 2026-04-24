@@ -1,5 +1,18 @@
 package Server;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.SocketAddress;
+import java.net.spi.InetAddressResolver;
+
 class Integral_Exception extends Exception {
     public Integral_Exception(String message) {
         super(message);
@@ -40,6 +53,41 @@ class SubIntegralThread extends Thread {
         }
         System.out.println(this.name + ": calculating finished.");
         this.mainIntegral.addResult(sum);
+    }
+}
+
+class Pack {
+    private ServerSocket serverSocket;
+
+    Pack() throws IOException, InterruptedException {
+
+        serverSocket = new ServerSocket(8080);
+        System.out.println("Started: " + serverSocket);
+        try {
+            Socket socket = serverSocket.accept();
+            try {
+                System.out.println("Connected");
+                BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                PrintWriter out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())));
+                while (true) {
+                    String str = in.readLine();
+                    System.out.println(str);
+                    out.println(str);
+                    Thread.sleep(1000);
+                }
+
+            } finally {
+                socket.close();
+            }
+        } finally {
+            System.out.println("Closing...");
+            this.serverSocket.close();
+        }
+
+    }
+
+    void Receiver() {
+
     }
 }
 
