@@ -57,36 +57,47 @@ class SubIntegralThread extends Thread {
 }
 
 class Pack {
-    private ServerSocket serverSocket;
+    private ServerSocket serverSocket; // Серверный сокет
+    private Socket clientSocket; // Пишущий сокет
+    BufferedReader in; // Получение сообщений
+    PrintWriter out; // Отправка сообщений
 
-    Pack() throws IOException, InterruptedException {
+    Pack() throws IOException, InterruptedException, Integral_Exception {
 
         serverSocket = new ServerSocket(8080);
         System.out.println("Started: " + serverSocket);
         try {
-            Socket socket = serverSocket.accept();
-            try {
-                System.out.println("Connected");
-                BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                PrintWriter out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())));
-                while (true) {
-                    String str = in.readLine();
-                    System.out.println(str);
-                    out.println(str);
-                    Thread.sleep(1000);
-                }
+            clientSocket = serverSocket.accept();
+            System.out.println("client connected");
+            in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+            out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream())), true);
 
-            } finally {
-                socket.close();
-            }
-        } finally {
-            System.out.println("Closing...");
-            this.serverSocket.close();
+        } catch (IOException ex) {
         }
 
     }
 
-    void Receiver() {
+    /*
+     * Отправка пакета с верхним пределом, нижним пределом и шагом. Затем получение
+     * результата расчета.
+     */
+    double send(double lim_high, double lim_low, double step) {
+
+        double result = 0;
+        out.printf("%f|%f|%f\n", lim_high, lim_low, step);
+        try {
+            result = Double.parseDouble(in.readLine());
+            return result;
+        } catch (IOException ex) {
+            System.out.println(ex.getLocalizedMessage());
+            return result;
+        }
+    }
+
+    void disconnect() throws IOException {
+
+        clientSocket.close();
+        serverSocket.close();
 
     }
 }
@@ -94,52 +105,21 @@ class Pack {
 public class Integral {
     private double result;
 
-    public double calculate(
-            double lim_low,
-            double lim_high,
-            double step) throws Integral_Exception {
+    public double calculate(double lim_low, double lim_high, double step) throws Integral_Exception {
         if ((lim_low < 0.000001 || lim_low > 1000000.0) ||
                 (lim_high < 0.000001 || lim_high > 1000000.0) ||
                 (step < 0.000001 || step > 1000000.0)) {
-            throw new Integral_Exception(
-                    "Недопустимый диапазон введенных данных.\n" +
-                            "Максимальное допустимое число: 999999\n" +
-                            "Минимальное допустимое число: 0.000001");
+            throw new Integral_Exception("Недопустимый диапазон введенных данных.\n" +
+                    "Максимальное допустимое число: 999999\n" +
+                    "Минимальное допустимое число: 0.000001");
         }
         if (lim_low >= lim_high) {
             throw new Integral_Exception("Нижний предел должен быть меньше верхнего.");
         }
+        // long start = System.nanoTime();
+        // long stop = System.nanoTime();
 
-        /* Создание потоков для вычисления подинтегралов */
-        var th1 = new SubIntegralThread(lim_low,
-                lim_low + ((lim_high - lim_low) / 3),
-                step,
-                this,
-                "th1");
-        var th2 = new SubIntegralThread(lim_low + ((lim_high - lim_low) / 3),
-                lim_low + 2 * ((lim_high - lim_low) / 3),
-                step,
-                this,
-                "th2");
-        var th3 = new SubIntegralThread(lim_low + 2 * ((lim_high - lim_low) / 3),
-                lim_high,
-                step,
-                this,
-                "th3");
-        long start = System.nanoTime();
-        th1.start();
-        th2.start();
-        th3.start();
-
-        try {
-            th1.join();
-            th2.join();
-            th3.join();
-        } catch (InterruptedException ex) {
-            System.out.println(ex.getMessage());
-        }
-        long stop = System.nanoTime();
-        System.out.printf("Время вычисления: %d мс.\n", (stop - start) / 1000_000);
+        // System.out.printf("Время вычисления: %d мс.\n", (stop - start) / 1000_000);
         return result;
     }
 

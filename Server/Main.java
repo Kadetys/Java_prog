@@ -1,17 +1,18 @@
 package Server;
 
-import java.io.IOException;
-
 public class Main {
 
     public static void main(String[] args) {
+
+        /* Подключение клиента ??? */
+
         SimpleGUI form = new SimpleGUI();
         form.setVisible(true);
-        Pack p;
+        Pack pack = null;
         try {
-            p = new Pack();
-        } catch (IOException | InterruptedException ex) {
-            System.out.println(ex.getMessage());
+            pack = new Pack();
+        } catch (Exception ex) {
+
         }
 
     }
