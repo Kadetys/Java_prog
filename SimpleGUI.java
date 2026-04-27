@@ -34,6 +34,7 @@ class Set_GUI_Elements {
             JButton button_insert,
             JButton button_cleartab,
             JButton button_loadtab,
+            JButton button_restore_table,
             JButton button_save_textfile,
             JButton button_save_binfile,
             JTextField textbox_limhigh,
@@ -52,6 +53,7 @@ class Set_GUI_Elements {
 
         button_cleartab.setBounds(270, 200, 120, 50);
         button_loadtab.setBounds(400, 200, 120, 50);
+        button_restore_table.setBounds(400, 140, 120, 50);
         button_save_textfile.setBounds(530, 200, 120, 50);
         button_save_binfile.setBounds(660, 200, 120, 50);
 
@@ -74,6 +76,7 @@ class Set_GUI_Elements {
         container.add(button_save_textfile);
         container.add(button_save_binfile);
         container.add(button_loadtab);
+        container.add(button_restore_table);
         container.add(jp);
         jp.setViewportView(table_result);
     }
@@ -123,7 +126,8 @@ public class SimpleGUI extends JFrame {
                 button_cleartab = new JButton("<html><center>Очистить<br>таблицу</center></html>"),
                 button_loadtab = new JButton("<html><center>Загрузить<br>таблицу</center></html>"),
                 button_save_textfile = new JButton("<html><center>Сохранить<br>текстовый файл</center></html>"),
-                button_save_binfile = new JButton("<html><center>Сохранить<br>двоичный файл</center></html>");
+                button_save_binfile = new JButton("<html><center>Сохранить<br>двоичный файл</center></html>"),
+                button_restore_table = new JButton("<html><center>Восстановить<br>таблицу</center></html>");
         /*
          * Экземпляр таблицы для хранения
          * результатов вычислений.
@@ -161,6 +165,7 @@ public class SimpleGUI extends JFrame {
                 button_insert,
                 button_cleartab,
                 button_loadtab,
+                button_restore_table,
                 button_save_textfile,
                 button_save_binfile,
                 textbox_limhigh,
@@ -181,6 +186,7 @@ public class SimpleGUI extends JFrame {
         var Load_al = new LoadActionListener(table_result);
         var SaveTextFile_al = new SaveTextActionListener();
         var SaveBinFile_al = new SaveBinActionListener();
+        var RestoreTable_al = new RestoreTableActionListener(table_result);
         button_calculate.addActionListener(
                 Integral_al);
         button_insert.addActionListener(Add_al);
@@ -189,6 +195,7 @@ public class SimpleGUI extends JFrame {
         button_loadtab.addActionListener(Load_al);
         button_save_textfile.addActionListener(SaveTextFile_al);
         button_save_binfile.addActionListener(SaveBinFile_al);
+        button_restore_table.addActionListener(RestoreTable_al);
 
     }
 
@@ -373,6 +380,24 @@ public class SimpleGUI extends JFrame {
 
             }
         }
+    }
+
+    public class RestoreTableActionListener implements ActionListener {
+        private JTable table;
+
+        RestoreTableActionListener(JTable table) {
+            this.table = table;
+        }
+
+        public void actionPerformed(ActionEvent e) {
+            if (table.getRowCount() == 0) {
+                for (var i : tablist)
+                    ((DefaultTableModel) this.table.getModel()).addRow(i.getData());
+            } else
+                return;
+
+        }
+
     }
 
     public class SaveTextActionListener implements ActionListener {
