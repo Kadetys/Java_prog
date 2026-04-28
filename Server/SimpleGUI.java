@@ -2,20 +2,76 @@ package Server;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+
+import java.awt.Container;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.math.RoundingMode;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Locale;
-import java.awt.*;
+import java.net.*;
+import java.io.*;
+
+class Server {
+    private ServerSocket serverSocket; // Серверный сокет
+
+    Server() throws IOException, InterruptedException, Integral_Exception {
+        serverSocket = new ServerSocket(8080);
+    }
+
+    ServerSocket getSocket() {
+        return this.serverSocket;
+    }
+}
+
+class User extends Thread {
+    private Socket clientSocket;
+    private ServerSocket serverSocket;
+    BufferedReader in; // Получение сообщений
+    PrintWriter out; // Отправка сообщений
+    double lim_high, lim_low, step;
+
+    User(ServerSocket serverSocket) {
+        super();
+        this.serverSocket = serverSocket;
+
+    }
+
+    void setData(double lim_high, double lim_low, double step) {
+        this.lim_high = lim_high;
+        this.lim_low = lim_low;
+        this.step = step;
+    }
+
+    /*
+     * Отправка пакета с верхним пределом, нижним пределом и шагом. Затем получение
+     * результата расчета.
+     */
+    public void run() {
+        System.out.println(this.threadId() + ": ожидание подключения.");
+        try {
+            clientSocket = serverSocket.accept();
+            in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+            out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream())), true);
+
+        } catch (IOException ex) {
+            System.out.println(ex.getMessage());
+        }
+        System.out.println("Клиент " + clientSocket + " подключен.");
+        double result = 0;
+        out.printf("%f|%f|%f\n",
+                this.lim_high,
+                this.lim_low,
+                this.step);
+        System.out.println("Данные на клиент отправлены");
+        try {
+            result = Double.parseDouble(in.readLine());
+        } catch (IOException ex) {
+            System.out.println(ex.getLocalizedMessage());
+        }
+    }
+}
 
 class Set_GUI_Elements {
     /*
@@ -76,12 +132,14 @@ class Set_GUI_Elements {
 
 public class SimpleGUI extends JFrame {
     private ArrayList<RecIntegral> tablist;
+    private int max_users;
 
-    public SimpleGUI() {
+    public SimpleGUI(int max_users) {
 
         super("Лабораторная работа №1");
         super.setBounds(0, 0, 700, 300);
         super.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        this.max_users = max_users;
         JScrollPane jp = new JScrollPane();
         Container container = super.getContentPane();
         container.setLayout(null);
@@ -179,6 +237,18 @@ public class SimpleGUI extends JFrame {
         button_cleartab.addActionListener(ClearTab_al);
         button_loadtab.addActionListener(Load_al);
         button_savefile.addActionListener(SaveFile_al);
+        Server server = null;
+        User[] users = null;
+        try {
+            server = new Server();
+            users = new User[max_users];
+            for (var i : users) {
+                i = new User(server.getSocket());
+                i.start();
+            }
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+        }
 
     }
 

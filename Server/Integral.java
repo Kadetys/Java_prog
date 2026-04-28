@@ -6,12 +6,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.net.Inet4Address;
-import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.SocketAddress;
-import java.net.spi.InetAddressResolver;
 
 class Integral_Exception extends Exception {
     public Integral_Exception(String message) {
@@ -24,82 +20,6 @@ class Integral_Exception extends Exception {
                 "Минимальное допустимое число: 0.000001\n");
     }
 
-}
-
-class SubIntegralThread extends Thread {
-    private String name;
-    Integral mainIntegral;
-    double lim_high, lim_low, step;
-
-    public SubIntegralThread(double lim_low, double lim_high, double step, Integral mainIntegral, String name) {
-        super();
-        this.name = name;
-        this.mainIntegral = mainIntegral;
-        this.lim_low = lim_low;
-        this.lim_high = lim_high;
-        this.step = step;
-    }
-
-    public void run() {
-        double sum = Math.cos(lim_low);
-        for (double i = lim_low + step; i < lim_high; i += step) {
-            sum += Math.cos(i);
-            if ((i + step) >= lim_high) {
-                sum = sum * step;
-                sum += (Math.cos(lim_high) * (lim_high - i));
-                break;
-
-            }
-        }
-        System.out.println(this.name + ": calculating finished.");
-        this.mainIntegral.addResult(sum);
-    }
-}
-
-class Pack {
-    private ServerSocket serverSocket; // Серверный сокет
-    private Socket clientSocket; // Пишущий сокет
-    BufferedReader in; // Получение сообщений
-    PrintWriter out; // Отправка сообщений
-
-    Pack() throws IOException, InterruptedException, Integral_Exception {
-
-        serverSocket = new ServerSocket(8080);
-        System.out.println("Started: " + serverSocket);
-        try {
-            clientSocket = serverSocket.accept();
-            System.out.println("client connected");
-            in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-            out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream())), true);
-
-        } catch (IOException ex) {
-        }
-
-    }
-
-    /*
-     * Отправка пакета с верхним пределом, нижним пределом и шагом. Затем получение
-     * результата расчета.
-     */
-    double send(double lim_high, double lim_low, double step) {
-
-        double result = 0;
-        out.printf("%f|%f|%f\n", lim_high, lim_low, step);
-        try {
-            result = Double.parseDouble(in.readLine());
-            return result;
-        } catch (IOException ex) {
-            System.out.println(ex.getLocalizedMessage());
-            return result;
-        }
-    }
-
-    void disconnect() throws IOException {
-
-        clientSocket.close();
-        serverSocket.close();
-
-    }
 }
 
 public class Integral {

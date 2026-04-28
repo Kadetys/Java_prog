@@ -6,14 +6,7 @@ public class Main {
 
         /* Подключение клиента ??? */
 
-        SimpleGUI form = new SimpleGUI();
+        SimpleGUI form = new SimpleGUI(5);
         form.setVisible(true);
-        Pack pack = null;
-        try {
-            pack = new Pack();
-        } catch (Exception ex) {
-
-        }
-
     }
 }
