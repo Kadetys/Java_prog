@@ -94,15 +94,15 @@ class Pack {
 
     Pack() throws UnknownHostException, IOException {
 
-        socket = new Socket("localhost", 8080);
+        socket = new Socket("10.183.203.170", 8080);
         System.out.println(socket);
         in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())), true);
         try {
             while (socket.isConnected()) {
-                String[] received = (in.readLine().split("|"));
+                String[] received = (in.readLine().replace(",", ".").split("\\s*\\|\\s*"));
                 System.out.printf(
-                        "Получены данные с сервера...\n Верхний предел: %s\n Нижний предел: %s\n Шаг: %s",
+                        "Получены данные с сервера...\n Верхний предел: %s\n Нижний предел: %s\n Шаг: %s\n",
                         received[0],
                         received[1],
                         received[2]);
@@ -114,8 +114,8 @@ class Pack {
                 out.println(integral.getResult());
             }
 
-        } finally {
-            socket.close();
+        } catch (Exception ex) {
+            System.err.println(ex.getMessage());
         }
     }
 }
