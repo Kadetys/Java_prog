@@ -8,48 +8,6 @@ import java.math.RoundingMode;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Locale;
-import java.net.*;
-import java.io.*;
-
-class Server {
-    private ServerSocket serverSocket; // Серверный сокет
-
-    Server() throws IOException, InterruptedException, Integral_Exception {
-        serverSocket = new ServerSocket(8080);
-    }
-
-    ServerSocket getSocket() {
-        return this.serverSocket;
-    }
-}
-
-class User extends Thread {
-    private Socket clientSocket;
-    private ServerSocket serverSocket;
-    BufferedReader in; // Получение сообщений
-    PrintWriter out; // Отправка сообщений
-
-    User(ServerSocket serverSocket) {
-        super();
-        this.serverSocket = serverSocket;
-    }
-
-    /*
-     * Отправка пакета с верхним пределом, нижним пределом и шагом. Затем получение
-     * результата расчета.
-     */
-    public void run() {
-        System.out.println(this.threadId() + ": ожидание подключения.");
-        try {
-            clientSocket = serverSocket.accept();
-            in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-            out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream())), true);
-
-        } catch (IOException ex) {
-            System.out.println(ex.getMessage());
-        }
-    }
-}
 
 class Set_GUI_Elements {
     /*
@@ -110,6 +68,7 @@ class Set_GUI_Elements {
 
 public class SimpleGUI extends JFrame {
     ArrayList<RecIntegral> tablist;
+    NetworkController controller;
 
     public SimpleGUI(int max_users) {
 
@@ -213,6 +172,8 @@ public class SimpleGUI extends JFrame {
         button_cleartab.addActionListener(ClearTab_al);
         button_loadtab.addActionListener(Load_al);
         button_savefile.addActionListener(SaveFile_al);
+
+        controller = new NetworkController();
 
     }
 
